@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,14 +9,14 @@ public class NormalShooter : MonoBehaviour
     public BulletManager bulletManager;
 
     [Header("生成オブジェクトと位置")]
-    public GameObject bulletPrefabs;//生成対象プレハブ
-    public GameObject gate; //生成位置
+    public GameObject bulletPrefabs;    //生成対象プレハブ
+    public GameObject gate;     //生成位置
 
     [Header("弾速")]
-    public float shootSpeed = 10.0f; //弾速
+    public float shootSpeed = 10.0f;    //弾速
 
-    GameObject bullets; //生成した弾をまとめるオブジェクト
-    
+    GameObject bullets;     //生成した弾をまとめるオブジェクト
+
     //InputAction(Playerマップ)のAttackアクションがおされたら
     void OnAttack(InputValue value)
     {
@@ -24,11 +25,31 @@ public class NormalShooter : MonoBehaviour
 
     void Shoot()
     {
-       
+        // 残数があれば
+        if (bulletManager.GetBulletRemaining() > 0)
+        {
+            // プレハブの生成と生成情報の取得
+            GameObject obj = Instantiate(
+                bulletPrefabs,              // 何を
+                gate.transform.position,    // どこに
+                Quaternion.Euler(90, 0, 0)  // どの角度で
+                );
+            // bulletを消費
+            bulletManager.ConsumeBullet();
+
+            // 生成したbullet自身のRigidbodyの力で飛ばす
+            Rigidbody bulletRbody = obj.GetComponent<Rigidbody>();
+            bulletRbody.AddForce(new Vector3(0, 0, shootSpeed) , ForceMode.Impulse);
+        }
+        else
+        {
+            // 残数がないとき補充する
+            bulletManager.RecoverBullet();
+        }
     }
 
     void Start()
     {
-        
-    }    
+
+    }
 }
