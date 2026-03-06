@@ -34,6 +34,9 @@ public class NormalShooter : MonoBehaviour
                 Quaternion.Euler(90,0,0)//どの角度で                
                 );
 
+            //生成したBulletをBulletsオブジェクトの子どもにしてまとめる
+            obj.transform.parent = bullets.transform;
+
             //bulletを消費
             bulletManager.ConsumeBullet();
 
@@ -50,6 +53,7 @@ public class NormalShooter : MonoBehaviour
 
     void Start()
     {
-        
+        //指定したタグを持っているオブジェクトを取得
+        bullets = GameObject.FindGameObjectWithTag("Bullets");
     }    
 }
