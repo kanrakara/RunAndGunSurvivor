@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ObjectGenerator : MonoBehaviour
 {
-    //生成レーンの情報
+    // 生成レーンの情報
     const int MinLane = -2;
     const int MaxLane = 2;
     const float LaneWidth = 1.0f;
@@ -20,14 +20,14 @@ public class ObjectGenerator : MonoBehaviour
     [Header("残数確認のためのBulletMangerスクリプト")]
     public BulletManager bulletManager;
 
-    bool createGoal; //ゴール生成フラグ
+    bool createGoal; // ゴール生成フラグ
 
     [Header("最大インターバル(エネミー・アイテム・トラップ)")]
     public float maxEnemyIntervalTime = 3.0f;
     public float maxItemIntervalTime = 8.0f;
     public float maxTrapIntervalTime = 5.0f;
 
-    //それぞれの生成インターバルのためのコルーチン
+    // それぞれの生成インターバルのためのコルーチン
     Coroutine enemyObjectGenerateCol;
     Coroutine itemObjectGenerateCol;
     Coroutine trapObjectGenerateCol;
@@ -35,16 +35,16 @@ public class ObjectGenerator : MonoBehaviour
 
     void Update()
     {
-        //ゴール生成済みでももう何もしない
+        // ゴール生成済みでももう何もしない
         if (GameManager.gameState == GameState.gameover || GameManager.gameState == GameState.retry || createGoal) return;
 
-        //目標座標が来たらゴール生成コルーチンとゴール生成フラグをON
+        // 目標座標が来たらゴール生成コルーチンとゴール生成フラグをON
         if (transform.position.z > goalPosition)
         {
             StartCoroutine(GoalObjectGenerateCol());
             createGoal = true;
         }
-        else //そうでなければエネミー・アイテム・トラップをそれぞれ独立して生成していく
+        else // そうでなければエネミー・アイテム・トラップをそれぞれ独立して生成していく
         {
             if (enemyObjectGenerateCol == null)
             {
@@ -62,14 +62,14 @@ public class ObjectGenerator : MonoBehaviour
 
     }
 
-    //エネミー生成コルーチン
+    // エネミー生成コルーチン
     IEnumerator EnemyObjectGenerateCol()
     {
-        //ランダムな数字を取得してウェイト
+        // ランダムな数字を取得してウェイト
         float generationInterval = Random.Range(1, maxEnemyIntervalTime + 1.0f);
         yield return new WaitForSeconds(generationInterval);
 
-        //ランダムな生成物と生成レーン番号を取得
+        // ランダムな生成物と生成レーン番号を取得
         int index = Random.Range(0, enemyObjects.Length);
         int targetLane = Random.Range(MinLane, MaxLane + 1);
 
@@ -78,59 +78,59 @@ public class ObjectGenerator : MonoBehaviour
             new Vector3(targetLane * LaneWidth, 1, transform.position.z),
             Quaternion.identity
             );
-        enemyObjectGenerateCol = null;　//コルーチンの解放
+        enemyObjectGenerateCol = null;　// コルーチンの解放
 
     }
 
-    //トラップ生成コルーチン
+    // トラップ生成コルーチン
     IEnumerator TrapObjectGenerateCol()
     {
-        //ランダムな数字を取得してウェイト
+        // ランダムな数字を取得してウェイト
         float generationInterval = Random.Range(1, maxTrapIntervalTime + 1.0f);
         yield return new WaitForSeconds(generationInterval);
 
-        //ランダムな生成物を取得
+        // ランダムな生成物を取得
         int index = Random.Range(0, trapObjects.Length);
         Instantiate(
             trapObjects[index],
             new Vector3(0, 1, transform.position.z),
             Quaternion.identity
             );
-        trapObjectGenerateCol = null;　//コルーチンの解放
+        trapObjectGenerateCol = null;　// コルーチンの解放
     }
 
-    //アイテム生成コルーチン
+    // アイテム生成コルーチン
     IEnumerator ItemObjectGenerateCol()
     {
-        //ランダムな数字を取得してウェイト
+        // ランダムな数字を取得してウェイト
         float generationInterval = Random.Range(5, maxItemIntervalTime + 1.0f);
         yield return new WaitForSeconds(generationInterval);
 
-        //残弾・マガジンが0なら優先してmagazine補充
+        // 残弾・マガジンが0なら優先してmagazine補充
         int index;
         if (bulletManager.GetBulletRemaining() <= 0 && bulletManager.GetMagazineRemaining() <= 0)
         {
             index = 0;
         }
-        else //残数があればオブジェクトをランダムに選ぶ
+        else // 残数があればオブジェクトをランダムに選ぶ
         {
             index = Random.Range(0, itemObjects.Length);
         }
-        //ランダムな生成レーン番号を取得
+        // ランダムな生成レーン番号を取得
         int targetLane = Random.Range(MinLane, MaxLane + 1);
         Instantiate(
             itemObjects[index],
             new Vector3(targetLane * LaneWidth, 1, transform.position.z),
             Quaternion.identity
             );
-        itemObjectGenerateCol = null;　//コルーチンの解放
+        itemObjectGenerateCol = null;　// コルーチンの解放
     }
 
-    //ゴール生成コルーチン
+    // ゴール生成コルーチン
     IEnumerator GoalObjectGenerateCol()
     {
-        yield return new WaitForSeconds(15.0f); //他のオブジェクトの生成があらかた終わるまでまつ
-        //ゴールの生成
+        yield return new WaitForSeconds(15.0f); // 他のオブジェクトの生成があらかた終わるまでまつ
+        // ゴールの生成
         Instantiate(
             goalPrefab,
             new Vector3(0, 1, transform.position.z),

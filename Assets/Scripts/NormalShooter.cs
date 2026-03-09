@@ -80,7 +80,7 @@ public class NormalShooter : MonoBehaviour
     }
 
     // 威力を上げるメソッド
-    public void ShoootPowerUp()
+    public void ShootPowerUp()
     {
         shootPower++;
         if (shootPower > maxShootPower) shootPower = maxShootPower;     // 最大威力までに抑える
@@ -89,7 +89,7 @@ public class NormalShooter : MonoBehaviour
     }
 
     // 威力を下げるメソッド
-    public void ShoootPowerDown()
+    public void ShootPowerDown()
     {
         shootPower--;
         if (shootPower <= 0) shootPower = 1;     // 最小威力までに抑える

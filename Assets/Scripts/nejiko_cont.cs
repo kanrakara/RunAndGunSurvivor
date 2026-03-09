@@ -52,7 +52,7 @@ public class NejikoController : MonoBehaviour
 		// 移動後接地してたらY方向の速度はリセットする
 		if (controller.isGrounded) moveDirection.y = 0;
 		
-		// 速度が０以上なら走っているフラグをtrueにする
+		// 速度が0以上なら走っているフラグをtrueにする
 		animator.SetBool("run", moveDirection.z > 0.0f);
 	}
 }

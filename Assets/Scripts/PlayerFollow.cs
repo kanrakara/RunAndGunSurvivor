@@ -16,6 +16,7 @@ public class PlayerFollow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Vector3.Lerpは2つのベクトルを線形補間したベクトルを返すメソッド
         transform.position = Vector3.Lerp(
             transform.position,
             target.transform.position - diff,
