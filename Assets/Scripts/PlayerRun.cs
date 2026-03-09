@@ -216,8 +216,19 @@ public class PlayerRun : MonoBehaviour
                 GameManager.gameState = GameState.gameover;
             }
 
-            Destroy(hit.gameObject);        // 相手は消滅
+            //Destroy(hit.gameObject);        // 相手は消滅
+            hit.gameObject.GetComponent<Wall>().CreateEffect();
         }
     }
+
+    // ゴールに触れたらステータスをゲームクリアに変更
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Goal")
+        {
+            GameManager.gameState = GameState.stageclear;
+        }
+    }
+
 
 }
