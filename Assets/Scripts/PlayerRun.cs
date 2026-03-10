@@ -17,6 +17,8 @@ public class PlayerRun : MonoBehaviour
 
     CharacterController controller;
     Animator animator;
+    public GameObject animeBody;    // アニメーターを持っている本体
+    bool isAnime;   // リトライ・リザルトのリアクションを発動させたか
 
     Vector3 moveDirection = Vector3.zero;       // 移動すべき量
     int targetLane;      // 向かうべき座標
@@ -65,7 +67,7 @@ public class PlayerRun : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>();
+        animator = animeBody.GetComponent<Animator>();
     }
 
     // 現在の体力を返す
@@ -194,6 +196,7 @@ public class PlayerRun : MonoBehaviour
         if (controller.isGrounded)      // 地面にいたら
         {
             moveDirection.y = speedJump;
+            animator.SetTrigger("jump");
         }
     }
 
@@ -214,10 +217,16 @@ public class PlayerRun : MonoBehaviour
             if (life <= 0)
             {
                 GameManager.gameState = GameState.gameover;
+                if (!isAnime)
+                {
+                    animator.SetTrigger("retry");
+                    isAnime = true;
+                }
             }
 
             //Destroy(hit.gameObject);        // 相手は消滅
             hit.gameObject.GetComponent<Wall>().CreateEffect();
+            animator.SetTrigger("damage");
         }
     }
 
@@ -227,6 +236,11 @@ public class PlayerRun : MonoBehaviour
         if (other.gameObject.tag == "Goal")
         {
             GameManager.gameState = GameState.stageclear;
+            if (!isAnime)
+            {
+                animator.SetTrigger("result");
+                isAnime = true;
+            }
         }
     }
 
