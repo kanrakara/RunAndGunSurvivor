@@ -29,7 +29,7 @@ public class ScoreManager : MonoBehaviour
 
     void Update()
     {
-        //未更新(calculated = false)でリトライならステージスコアをもとに戻す
+        //未更新でリトライならステージスコアをもとに戻す
         if (GameManager.gameState == GameState.retry && !calculated)
         {
             score = totalScore;

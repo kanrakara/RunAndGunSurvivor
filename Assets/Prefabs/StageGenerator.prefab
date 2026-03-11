@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &617017916315931449
+--- !u!1 &3892002207851208629
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 9162887981208038481}
-  - component: {fileID: 7797387244534672646}
+  - component: {fileID: 8262547069238012669}
+  - component: {fileID: 8545310437192601473}
   m_Layer: 0
   m_Name: StageGenerator
   m_TagString: Untagged
@@ -17,36 +17,37 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &9162887981208038481
+--- !u!4 &8262547069238012669
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 617017916315931449}
+  m_GameObject: {fileID: 3892002207851208629}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.5648, y: 0.5, z: 13.18863}
+  m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7797387244534672646
+--- !u!114 &8545310437192601473
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 617017916315931449}
+  m_GameObject: {fileID: 3892002207851208629}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd8aeb04e576a834e83a4177e98cb4ca, type: 3}
+  m_Script: {fileID: 11500000, guid: e561b08dd3b218549b0c2741b2cbc9e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
   character: {fileID: 0}
   stageChips:
-  - {fileID: 1213776574718657356, guid: 69bacccc6f873044aad12f944d554bab, type: 3}
+  - {fileID: 7362676403919762916, guid: 07b74bddd8905344cb5bc5eaf54d5c4c, type: 3}
+  - {fileID: 7362676403919762916, guid: bc6718802d3d4b24886e2d1007eee2fb, type: 3}
   startChipIndex: 1
   preInstantiate: 5
   generatedStageList:

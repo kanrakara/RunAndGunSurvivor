@@ -4,216 +4,219 @@ using UnityEngine.InputSystem;
 
 public class PlayerRun : MonoBehaviour
 {
-    // 横移動のX軸の限界
-    const int MinLane = -2;
-    const int MaxLane = 2;
-    const float LaneWidth = 1.0f;
-
-    // 体力の最大値
-    const int DefaultLife = 3;
-
-    // ダメージを食らったときの硬直時間
-    const float StunDuration = 0.5f;
+    const int MinLane = -2; //最小レーン番号
+    const int MaxLane = 2; //最大レーン番号
+    const float LaneWidth = 2.0f; //レーン幅
+    const int DefaultLife = 3; //最大体力
+    const float StunDuration = 0.5f; //硬直時間
 
     CharacterController controller;
     Animator animator;
-    public GameObject animeBody;    // アニメーターを持っている本体
-    bool isAnime;   // リトライ・リザルトのリアクションを発動させたか
 
-    Vector3 moveDirection = Vector3.zero;       // 移動すべき量
-    int targetLane;      // 向かうべき座標
-    int life = DefaultLife;     // 現体力
-    float recoverTime = 0.0f;       // 復帰までのカウントダウン
+    [Header("対象アニメオブジェクト")]
+    public GameObject animeBody; //対象body
+    bool isAnime; //retry,result切り替え済みか
 
-    float currentMoveInputX;        // InputSystemの入力値を格納
+    AudioSource[] playerAudio;
+    //足音判定
+    float footstepInterval = 0.3f; //足音間隔
+    float footstepTimer; //時間計測
+    [Header("SE音源")]
+    public AudioClip se_Walk;
+    public AudioClip se_Damage;
+    public AudioClip se_Explosion;
+    public AudioClip se_Jump;
+    public AudioClip se_Dash;
+    public AudioClip se_Reload;
 
-    // Inputを連続で認知しないためのインターバルのコルーチン
-    Coroutine resetIntervalCol;
+    Vector3 moveDirection = Vector3.zero; //Moveメソッドの目標値
+    int targetLane; //目標レーン番号
+    int life = DefaultLife; //現体力
+    float recoverTime = 0.0f; //硬直カウントダウン
 
-    public float gravity = 20.0f;       // 重直加速値
-    public float speedZ = 5.0f;     // 前進スピード
-    public float speedX = 3.0f;     // 横移動スピード
-    public float speedJump = 8.0f;      // ジャンプ力
-    public float accelerationZ = 10.0f;     // 全身加速力
+    float currentMoveInputX; //インプットされたX値
+    Coroutine resetIntervalCol; //インプットのインターバルコルーチン
+
+    [Header("重力・前進・横移動・ジャンプ")]
+    public float gravity = 20.0f; //重力加速値
+    public float speedZ = 5.0f; //前進スピード
+    public float speedX = 3.0f; //横移動スピード
+    public float speedJump = 8.0f; //ジャンプ力
+
+    [Header("前進加速力")]
+    public float accelerationZ = 10.0f; //加速値
 
     [Header("ソードのスクリプト")]
-    public NormalSword normalSword;
+    public NormalSword normalSword; //ソード中の動きを封じるため
 
+    //現体力の取得
+    public int Life()
+    {
+        return life;
+    }
+
+    //体力の回復
+    public void LifeUP()
+    {
+        life++;
+        if (life > DefaultLife) life = DefaultLife;
+        GameObject canvas = GameObject.FindGameObjectWithTag("UI"); //UIタグの検索
+        canvas.GetComponent<UIController>().UpdateLife(Life()); //UIの更新
+    }
+
+    //体力のダメージによる減少
+    public void LifeDown()
+    {
+        life--;
+        GameObject canvas = GameObject.FindGameObjectWithTag("UI"); //UIタグの検索
+        canvas.GetComponent<UIController>().UpdateLife(Life()); //UIの更新
+    }
+
+    //硬直カウントダウン中か体力0なら止まる
+    bool IsStun()
+    {
+        return recoverTime > 0.0f || life <= 0;
+    }
 
     void OnMove(InputValue value)
     {
-        // NormalSwordスクリプトのisSword変数を見て攻撃中なら何もできない
-        if (normalSword.GetIsSword()) { return; }
+        if (normalSword.GetIsSword()) return; //ソード中なら何もできない
 
-        // すでに前に入力検知してインターバル中であれば何もしない
         if (resetIntervalCol == null)
         {
-            // 検知した値(value)をVector2で表現して変数inputVectorに格納
             Vector2 inputVector = value.Get<Vector2>();
-            // 変数inputVectorのうち、x座標にまつわる値を変数correntMoveInutXに格納
-            currentMoveInputX = inputVector.x;
+            currentMoveInputX = inputVector.x; // x成分が左右の入力（-1:左, 0:なし, 1:右）
         }
     }
-
     void OnJump(InputValue value)
     {
-        // NormalSwordスクリプトのisSword変数を見て攻撃中なら何もできない
-        if (normalSword.GetIsSword()) { return; }
+        if (normalSword.GetIsSword()) return; //ソード中なら何もできない
 
-        // ジャンプに関するボタン検知をしたらジャンプメソッド
         Jump();
     }
-
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = animeBody.GetComponent<Animator>();
+        playerAudio = GetComponents<AudioSource>();
     }
 
-    // 現在の体力を返す
-    public int Life()
-    {
-        return (life);
-    }
-
-    // 体力を1回復
-    public void LifeUP()
-    {
-        if (life < DefaultLife) { life++; }
-        GameObject canvas = GameObject.FindGameObjectWithTag("UI");
-        canvas.GetComponent<UIController>().UpdateLife(life);
-    }
-
-    public void LifeDown()
-    {
-        life--;
-        GameObject canvas = GameObject.FindGameObjectWithTag("UI");
-        canvas.GetComponent<UIController>().UpdateLife(life);
-    }
-
-
-    // Playerを硬直させるべきかチェックするメソッド
-    bool IsStun()
-    {
-        return (recoverTime > 0 || life <= 0);
-    }
-
-
-
-    // Update is called once per frame
     void Update()
     {
-        if (GameManager.gameState == GameState.stageclear || GameManager.gameState == GameState.result) { return; }
-
-        // InputManagerシステム採用の場合
+        if (GameManager.gameState == GameState.stageclear || GameManager.gameState == GameState.result) return;
         //if (Input.GetKeyDown("left")) MoveToLeft();
         //if (Input.GetKeyDown("right")) MoveToRight();
         //if (Input.GetKeyDown("space")) Jump();
 
-        // 左を押されていたら
-        if (currentMoveInputX < 0) { MoveToLeft(); }
+        //左右の入力があれば
+        if (currentMoveInputX < 0) MoveToLeft();
+        if (currentMoveInputX > 0) MoveToRight();
 
-        // 右を押されていたら
-        if (currentMoveInputX > 0) { MoveToRight(); }
-
-        if (IsStun())       // 硬直フラグをチェック
+        //硬直中なら何もできない
+        if (IsStun())
         {
-            // moveDirectionのxを0
-            moveDirection.x = 0;
-            // moveDirectionのzを0
-            moveDirection.z = 0;
-
-            // recovetTimeをカウントダウン
-            recoverTime -= Time.deltaTime;
+            moveDirection.x = 0.0f;
+            moveDirection.z = 0.0f;
+            recoverTime -= Time.deltaTime; //カウントダウンする
         }
         else
         {
-            // その時のmoveDirection.zにaccelerationZの加速度を足していく
+            //moveDirectionのZ(前進加速)を決める
             float acceleratedZ = moveDirection.z + (accelerationZ * Time.deltaTime);
-            // 導き出した値に上限を設けて、それをmoveDirection.zとする
             moveDirection.z = Mathf.Clamp(acceleratedZ, 0, speedZ);
 
-            // 横移動のアルゴリズム。Updateでフレームごとに少量移動した量を見ながら
-            // 目的地と自分の位置の差を取り、1レーンあたりの幅に対しての割合を見る
-            float rationX = (targetLane * LaneWidth - transform.position.x) / LaneWidth;
-            // 割合に変数speedXを係数としてかけた値がmoveDirection.x
-            // 目的から遠いと早く、近いと遅くなる
-            moveDirection.x = rationX * speedX;
+            //moveDirectionのX(横移動)を決める
+            float ratioX = (targetLane * LaneWidth - transform.position.x) / LaneWidth;
+            moveDirection.x = ratioX * speedX;
         }
 
-        // 重力の加速度をmoveDirection.y
+        //moveDirectionのX(重力)を決める
         moveDirection.y -= gravity * Time.deltaTime;
 
-        // 回転時、自分にとってのZ軸をグローバル座標の値に変換
+        //ローカルの進行方向をグローバルの進行方向に切り替えてMoveメソッドで動かす
         Vector3 globalDirection = transform.TransformDirection(moveDirection);
-        // CharacterControllerコンポーネントのMoveメソッドに授けてPlayerを動かす
         controller.Move(globalDirection * Time.deltaTime);
 
-        // 地面についていたら重力をリセット
-        if (controller.isGrounded) { moveDirection.y = 0; }
+        //地面に接触していたらY軸の力は0
+        if (controller.isGrounded) moveDirection.y = 0;
 
+        //足音メソッド
+        HandleFootsteps();
+    }
+
+    //足音メソッド
+    void HandleFootsteps()
+    {
+        //地面にいてプレイヤーが動いていれば
+        if (controller.isGrounded && moveDirection.z != 0)
+        {
+            footstepTimer += Time.deltaTime; //時間計測
+
+            if (footstepTimer >= footstepInterval) //インターバルチェック
+            {
+                playerAudio[1].PlayOneShot(se_Walk);
+                footstepTimer = 0;
+            }
+        }
+        else //動いていなければ時間計測リセット
+        {
+            footstepTimer = 0f;
+        }
     }
 
     public void MoveToLeft()
     {
-        // 硬直フラグがtrueなら何もしない
-        if (IsStun()) { return; }
-        // 地面にいる且つtargetがまだ最小でない
+        if (IsStun()) return;
         if (controller.isGrounded && targetLane > MinLane)
         {
+            playerAudio[0].PlayOneShot(se_Dash);
             targetLane--;
-            currentMoveInputX = 0;      // 何も入力していない状況にリセット
-            // 次の入力検知を有効にするまでのインターバル
+            currentMoveInputX = 0;
             resetIntervalCol = StartCoroutine(ResetIntervalCol());
         }
     }
 
     public void MoveToRight()
     {
-        // 硬直フラグがtrueなら何もしない
-        if (IsStun()) { return; }
-        // 地面にいる且つtargetがまだ最大でない
+        if (IsStun()) return;
         if (controller.isGrounded && targetLane < MaxLane)
         {
+            playerAudio[0].PlayOneShot(se_Dash);
             targetLane++;
-            currentMoveInputX = 0;      // 何も入力していない状況にリセット
-            // 次の入力検知を有効にするまでのインターバル
+            currentMoveInputX = 0;
             resetIntervalCol = StartCoroutine(ResetIntervalCol());
         }
     }
 
     IEnumerator ResetIntervalCol()
     {
-        // とりあえず0.1秒待つ
         yield return new WaitForSeconds(0.1f);
-        resetIntervalCol = null;        // コルーチン情報を解除
+        resetIntervalCol = null;
     }
 
     public void Jump()
     {
-        // 硬直フラグがtrueなら何もしない
-        if (IsStun()) { return; }
-        if (controller.isGrounded)      // 地面にいたら
+        if (IsStun()) return;
+        if (controller.isGrounded)
         {
             moveDirection.y = speedJump;
             animator.SetTrigger("jump");
+            playerAudio[0].PlayOneShot(se_Jump);
         }
     }
 
-    // CharacterControllerコンポーネントが何かとぶつかったとき
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (IsStun()) { return; }
+        if (IsStun()) return;
 
-        // 相手がEnemyなら
-        if(hit.gameObject.tag == "Enemy")
+        if (hit.gameObject.tag == "Enemy")
         {
-            LifeDown();     // 体力が減る
-            GetComponent<NormalShooter>().ShootPowerDown();        // 銃の威力を減らすメソッド
-            recoverTime = StunDuration;     // recoverTimeに定数をセッティング
+            playerAudio[2].PlayOneShot(se_Damage);
+            LifeDown(); //体力減少
+            GetComponent<NormalShooter>().ShootPowerDown(); //威力も減らす
+            recoverTime = StunDuration; //硬直カウントダウンの開始
 
-
-            // 体力がなくなったらゲームオーバー
+            //もし体力0ならゲームオーバー
             if (life <= 0)
             {
                 GameManager.gameState = GameState.gameover;
@@ -224,25 +227,28 @@ public class PlayerRun : MonoBehaviour
                 }
             }
 
-            //Destroy(hit.gameObject);        // 相手は消滅
-            hit.gameObject.GetComponent<Wall>().CreateEffect();
             animator.SetTrigger("damage");
+
+            //相手のエフェクト発生（と消滅）を発動
+            hit.gameObject.GetComponent<Wall>().CreateEffect();
+
         }
     }
 
-    // ゴールに触れたらステータスをゲームクリアに変更
+    //ゴールに触れたらステータスをゲームクリアに変更
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Goal")
-        {
+        if(other.gameObject.tag == "Goal")
+        {            
             GameManager.gameState = GameState.stageclear;
             if (!isAnime)
             {
+                playerAudio[0].PlayOneShot(se_Reload);
                 animator.SetTrigger("result");
                 isAnime = true;
             }
+            Destroy(other.gameObject); //ゴールオブジェクトを抹消
         }
     }
-
 
 }

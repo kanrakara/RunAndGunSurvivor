@@ -100,13 +100,17 @@ sysinfo.txt
 #*.mat
 
 
-#独自に入れた書式・アセットやレジストリで思いもの
+#独自に入れた書式・アセットやレジストリで重いもの
 Assets/TextMesh Pro
 Assets/Sounds
 Assets/Fonts
 Assets/BrickToy_3D_LowPoly_FighterRobots_
 Assets/SciFiWarriorPBRHPPolyart
+git rm --cached -r Assets/LowpolyStreetPack
 Assets/Matthew Guz
-Assets/LowpolyStreetPack
+Assets/GabrielAguiarProductions
+Assets/russian_buildings
+Assets/skybox DEMO
+Assets/Fantasy Skybox FREE
 
 UserSettings/

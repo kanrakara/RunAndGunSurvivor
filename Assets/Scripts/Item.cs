@@ -17,7 +17,7 @@ public class Item : MonoBehaviour
     public GameObject effectPrefab;
 
     [Header("生成から削除までの時間")]
-    public float deleteTime = 15.0f;    
+    public float deleteTime = 15.0f;
 
     void Start()
     {
@@ -27,7 +27,7 @@ public class Item : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player")
-        {            
+        {
             switch (type)
             {
                 case ItemType.Magazine:
@@ -41,18 +41,19 @@ public class Item : MonoBehaviour
                     break;
             }
 
-            EffectCreate(); //いずれにしてもエフェクト生成
+            EffectCreate(other.gameObject); //いずれにしてもエフェクト生成
         }
     }
 
     //エフェクト生成
-    void EffectCreate()
+    void EffectCreate(GameObject other)
     {
-        Instantiate(
+        GameObject obj = Instantiate(
             effectPrefab,
             transform.position,
             Quaternion.identity
             );
+        obj.transform.parent = other.transform;
 
         Destroy(gameObject); //エフェクト発生後はアイテム自身は削除
     }
