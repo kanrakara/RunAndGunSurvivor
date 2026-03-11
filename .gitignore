@@ -106,7 +106,7 @@ Assets/Sounds
 Assets/Fonts
 Assets/BrickToy_3D_LowPoly_FighterRobots_
 Assets/SciFiWarriorPBRHPPolyart
-git rm --cached -r Assets/LowpolyStreetPack
+Assets/LowpolyStreetPack
 Assets/Matthew Guz
 Assets/GabrielAguiarProductions
 Assets/russian_buildings

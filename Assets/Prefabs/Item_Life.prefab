@@ -29415,7 +29415,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &100586865527702026
 MonoBehaviour:
@@ -29432,7 +29432,6 @@ MonoBehaviour:
   type: 2
   effectPrefab: {fileID: 6441873369525384307, guid: c55130d0ae207804399589fc70534946, type: 3}
   deleteTime: 15
-  se_Item: {fileID: 8300000, guid: 203e91e0a64ce6948ae58114f55f60ab, type: 3}
 --- !u!1 &7620960166558541644
 GameObject:
   m_ObjectHideFlags: 0

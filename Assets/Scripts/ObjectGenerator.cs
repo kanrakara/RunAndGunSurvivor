@@ -83,7 +83,7 @@ public class ObjectGenerator : MonoBehaviour
         //ランダムな生成物と生成レーン番号を取得
         index = Random.Range(0, enemyObjects.Length);
         int targetLane2 = Random.Range(MinLane, MaxLane + 1);
-        //違うレーンになるまで生成
+        //重複した場合はレーン番号が同じ間は何回でも繰り返し
         while(targetLane2 == targetLane1)
         {
             targetLane2 = Random.Range(MinLane, MaxLane + 1);
